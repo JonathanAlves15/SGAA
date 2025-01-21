@@ -3,7 +3,7 @@ from modelos.treino_model import Treino
 from sqlmodel import select, Session
 from datetime import datetime
 from fastapi import HTTPException
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, contains_eager
 
 def insert_aluno(aluno_base: AlunoBase, session: Session):
     """
@@ -101,7 +101,7 @@ def select_aluno_treinos(aluno_id: int, session: Session):
     """ 
     aluno_treinos = session.exec(
         select(Aluno).options(
-            joinedload(Aluno.treinos).joinedload(Treino.exercicios)
+            joinedload(Aluno.treinos)
         ).where(Aluno.id == aluno_id)
     ).unique()
 
@@ -119,7 +119,8 @@ def select_aluno_treinos(aluno_id: int, session: Session):
 
 def select_aluno_treino_dia_semana(aluno_id: int, dia_semana: str, session: Session):
     """
-    Retorna os treinos de um dia da semana de um aluno do id em questão e os exercícios relacionados a cada treino
+    Retorna os treinos de um dia da semana de um aluno do id em questão
+    e os exercícios relacionados a cada treino
     Args:
         aluno_id (int): Id do aluno
         dia_semana (str): Dia da semana
@@ -130,9 +131,10 @@ def select_aluno_treino_dia_semana(aluno_id: int, dia_semana: str, session: Sess
         HTTPException: Caso o aluno não seja encontrado
     """ 
     aluno_treinos = session.exec(
-        select(Aluno).options(
-            joinedload(Aluno.treinos).joinedload(Treino.exercicios)
-        ).where(Aluno.id == aluno_id)
+        select(Aluno).join(Aluno.treinos)
+        .options(
+            contains_eager(Aluno.treinos)
+        ).filter(Aluno.id == aluno_id).filter(Treino.dia_semana == dia_semana)
     ).unique()
 
     if aluno_treinos:
@@ -160,7 +162,10 @@ def select_aluno_data_inscricao(data_inscricao: datetime, pagina: int, tamanho_p
         HTTPException: Caso nenhum aluno for encontrado
     """ 
     offset = (pagina - 1) * tamanho_pagina
-    alunos = session.exec(select(Aluno).where(Aluno.data_inscricao == data_inscricao).offset(offset).limit(tamanho_pagina)).all()
+    alunos = session.exec(
+        select(Aluno).where(Aluno.data_inscricao == data_inscricao)
+        .offset(offset).limit(tamanho_pagina)
+    ).all()
     if not alunos:
         raise HTTPException(status_code=404, detail="Nenhum aluno encontrado")
     

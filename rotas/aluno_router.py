@@ -9,7 +9,7 @@ router = APIRouter()
 
 @router.post("/alunos")
 def post_aluno(aluno_base: AlunoBase, session: Session = Depends(get_session)):
-    aluno_control.insert_aluno(aluno_base, session)
+    return aluno_control.insert_aluno(aluno_base, session)
 
 @router.get("/alunos/quantidade")
 def get_alunos_quantidade(session: Session = Depends(get_session)):
@@ -41,8 +41,8 @@ def get_aluno_data_inscricao(data_inscricao: str, pagina: int, session: Session 
 
 @router.delete("/alunos/{aluno_id}")
 def delete_aluno(aluno_id: int, session: Session = Depends(get_session)):
-    aluno_control.delete_aluno(aluno_id, session)
+    return aluno_control.delete_aluno(aluno_id, session)
 
 @router.put("/alunos/{aluno_id}")
 def put_aluno(aluno_id: int, aluno_base: AlunoBase, session: Session = Depends(get_session)):
-    aluno_control.update_aluno(aluno_id, aluno_base, session)
+    return aluno_control.update_aluno(aluno_id, aluno_base, session)

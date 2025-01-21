@@ -12,4 +12,4 @@ class Aluno(SQLModel, table=True):
     nome: str
     idade: int
     data_inscricao: date = Field(default_factory=date.today)
-    treinos: list["Treino"] | None = Relationship(back_populates="aluno")
+    treinos: list["Treino"] | None = Relationship(back_populates="aluno", cascade_delete=True)
